@@ -1,0 +1,15 @@
+
+services:
+    blog-api-postgres:
+        image: postgres:17.7
+        ports:
+          - "5432:5432"
+        volumes:
+            - blog_api_postgres_data:/var/lib/postgresql/data
+        environment:
+            - POSTGRES_DB=blogapi
+            - POSTGRES_PASSWORD=2733
+
+volumes:
+    blog_api_postgres_data:
+        driver: local
