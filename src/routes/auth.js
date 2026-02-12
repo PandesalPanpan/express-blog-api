@@ -1,7 +1,6 @@
 import { Router } from "express";
 import jwt from "jsonwebtoken";
-import { configDotenv } from "dotenv";
-configDotenv();
+import auth from "../middleware/auth.js";
 
 const router = Router();
 
@@ -16,9 +15,8 @@ router.post("/login", (req, res) => {
     res.json({
         token
     });
-
-    // Later add a helper or lib for verifying a hash password
 })
+
 
 // (Ask AI where to put the folder for JWT that verifies and signs)
 
