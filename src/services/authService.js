@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs'
 
-const saltRounds = process.env.SALT_ROUNDS;
+const saltRounds = Number(process.env.SALT_ROUNDS) || 10;
 
 const hashPassword = async (plainPassword) => {
     // What are even rainbow stuff you mentioned?
