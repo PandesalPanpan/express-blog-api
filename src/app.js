@@ -1,6 +1,7 @@
 import express from "express";
 import { configDotenv } from "dotenv";
 import * as routes from "./routes/index.js";
+import errorHandler from "./middleware/errorHandler.js";
 
 configDotenv();
 
@@ -11,6 +12,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
 
 app.use("/api/auth", routes.auth);
+
+
+// Error Middleware
+app.use(errorHandler);
 
 app.listen(PORT, (error) => {
     if (error) {
