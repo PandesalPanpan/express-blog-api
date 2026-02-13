@@ -1,6 +1,6 @@
 import { Router } from "express";
 import jwt from "jsonwebtoken";
-import auth from "../middleware/auth.js";
+import { authController } from '../controllers/index.js';
 
 const router = Router();
 
@@ -10,20 +10,19 @@ router.post("/login", (req, res) => {
     const user = {
         name: "Peter"
     };
-    const token = jwt.sign({user}, process.env.SECRET, { expiresIn: '1h'});
+    const token = jwt.sign({ user }, process.env.SECRET, { expiresIn: '1h' });
 
     res.json({
         token
     });
 })
 
-
-// (Ask AI where to put the folder for JWT that verifies and signs)
-
 // Register Route
+router.post("/register", authController.register);
 
 
 // Test Route
+router.get("/test", authController.test);
 
 // Refresh Route???
 
