@@ -4,25 +4,14 @@ import * as authController from '../controllers/authController.js'
 
 const router = Router();
 
-// Login Route
-router.post("/login", (req, res) => {
-    // For now just immediately verify a test user
-    const user = {
-        name: "Peter"
-    };
-    const token = jwt.sign({ user }, process.env.SECRET, { expiresIn: '1h' });
-
-    res.json({
-        token
-    });
-})
-
 // Register Route
 router.post("/register", authController.register);
 
+router.post("/login", authController.login);
+
 
 // Test Route
-router.get("/test", authController.test);
+// router.get("/test", authController.test);
 
 // Refresh Route???
 
