@@ -1,52 +1,44 @@
+import { SECRET } from "../config.js";
 import { prisma } from "../lib/prisma.js";
 import authService from '../services/authService.js'
 import jwt from "jsonwebtoken";
+import { userRegisterValidation, validate } from "../validators/userValidator.js";
 // Create the action for register route
-export const register = async (req, res, next) => {
-    // TODO: Verifications and Errors
+export const register = [
+    userRegisterValidation,
+    validate,
+    async (req, res, next) => {
+        const { email, username, password } = req.body;
 
-    // Grab the req.body
-    const { username, password } = req.body;
-
-    if (typeof username !== 'string' || typeof password !== 'string') {
-        return res.status(400).json({
-            message: "You have sent lacking username or password."
-        });
-    }
-
-    const usernameTrim = username.trim();
-    const normalizedUsername = usernameTrim.toLowerCase();
-
-
-    try {
-        // Check if username exist through prisma
-        const existingUser = await prisma.user.findFirst({
-            where: {
-                username: {
-                    equals: normalizedUsername, mode: 'insensitive'
+        try {
+            const existingUser = await prisma.user.findUnique({
+                where: {
+                    email
                 }
-            }
-        });
+            })
 
-        if (existingUser) return res.status(409).json(
-            { message: `The username ${username} already exists.` }
-        );
+            if (existingUser) return res.status(409).json(
+                { message: `The email ${email} already exists.` }
+            );
+            
+            const hashedPassword = await authService.hashPassword(password);
+            
+            const user = await prisma.user.create({
+                data: {
+                    email,
+                    username,
+                    password: hashedPassword
+                }
+            })
 
-        const hashedPassword = await authService.hashPassword(password);
-
-        const user = await prisma.user.create({
-            data: {
-                username: usernameTrim,
-                password: hashedPassword
-            }
-        })
-
-        const { password: _pw, ...safeUser } = user
-        return res.status(201).json({ user: safeUser })
-    } catch (error) {
-        return next(error);
+            const { password: _pw, ...safeUser } = user
+            
+            return res.status(201).json({ user: safeUser })
+        } catch (error) {
+            return next(error);
+        }
     }
-}
+]
 
 export const login = async (req, res, next) => {
     // Check the username and password if it exists or invalid
@@ -78,7 +70,7 @@ export const login = async (req, res, next) => {
         // Destruct the safe info
         const { password: _pw, ...safeUser } = user;
         // TODO: Create a TODO that grabs the safe details from user prisma
-        const token = jwt.sign(safeUser, process.env.SECRET, { expiresIn: '1h' });
+        const token = jwt.sign(safeUser, SECRET, { expiresIn: '1h' });
 
         return res.status(200).json({
             message: "Login Sucessful",
