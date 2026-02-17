@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import { SECRET } from '../config';
 
 const auth = (req, res, next) => {
     // Grab the authorization header
@@ -18,7 +19,7 @@ const auth = (req, res, next) => {
         });
     }
     // Verify
-    jwt.verify(token, process.env.SECRET, (err, data) => {
+    jwt.verify(token, SECRET, (err, data) => {
         if (err) {
             return res.status(403).json({ message: "Invalid token" })
         }

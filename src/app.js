@@ -2,10 +2,10 @@ import express from "express";
 import { configDotenv } from "dotenv";
 import * as routes from "./routes/index.js";
 import errorHandler from "./middleware/errorHandler.js";
+import { PORT } from "./config.js";
 
 configDotenv();
 
-const PORT = process.env.PORT || 3000;
 const app = express();
 
 app.use(express.json());

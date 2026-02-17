@@ -1,10 +1,9 @@
 import bcrypt from 'bcryptjs'
-
-const saltRounds = Number(process.env.SALT_ROUNDS) || 10;
+import { SALT_ROUNDS } from '../config.js';
 
 const hashPassword = async (plainPassword) => {
     // What are even rainbow stuff you mentioned?
-    const salt = await bcrypt.genSalt(saltRounds);
+    const salt = await bcrypt.genSalt(SALT_ROUNDS);
     const hashed = await bcrypt.hash(plainPassword, salt);
     return hashed; 
 }
