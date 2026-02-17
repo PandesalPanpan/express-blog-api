@@ -1,10 +1,7 @@
 import express from "express";
-import { configDotenv } from "dotenv";
 import * as routes from "./routes/index.js";
 import errorHandler from "./middleware/errorHandler.js";
 import { PORT } from "./config.js";
-
-configDotenv();
 
 const app = express();
 
