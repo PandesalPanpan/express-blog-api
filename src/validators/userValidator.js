@@ -17,7 +17,14 @@ export const userRegisterValidation = [
         minNumbers: 1,
         minSymbols: 0,
     })
-    .withMessage("Password must atleast be 8 characters and include uppercase, lowercase and number.")    
+    .withMessage("Password must atleast be 8 characters and include uppercase, lowercase and number."),
+    body("confirmPassword")
+    .custom((value, { req }) => {
+        if (value !== req.body.password) {
+            throw new Error("Password must match.");
+        }
+        return true;
+    })    
 
 ]
 
