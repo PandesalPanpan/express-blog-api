@@ -20,9 +20,9 @@ export const register = [
             if (existingUser) return res.status(409).json(
                 { message: `The email ${email} already exists.` }
             );
-            
+
             const hashedPassword = await authService.hashPassword(password);
-            
+
             const user = await prisma.user.create({
                 data: {
                     email,
@@ -32,7 +32,7 @@ export const register = [
             })
 
             const { password: _pw, ...safeUser } = user
-            
+
             return res.status(201).json({ user: safeUser })
         } catch (error) {
             return next(error);
@@ -41,41 +41,49 @@ export const register = [
 ]
 
 export const login = async (req, res, next) => {
-    // Check the username and password if it exists or invalid
-    const { username, password } = req.body;
-    if (typeof username !== 'string' || typeof password !== 'string') {
-        return res.status(400).json("Please enter a proper username & password.");
+
+    // Check if email and password exist
+    const { email, password } = req.body;
+    // Check if email matches in db
+    if (typeof email !== 'string' || typeof password !== 'string') {
+        return res.status(400).json({
+            message: "Entered invalid details."
+        })
     }
 
     try {
-        // check the username for matching username and password
-        // See if the username exist in the database.
-        const user = await prisma.user.findFirst({
-            where: {
-                username: {
-                    equals: username, mode: 'insensitive'
-                }
-            }
-        })
+        // Grab the email using prisma
+        const user = await prisma.user.findUnique({
+            where: { email }
+        });
 
-        // If the username is not found, return an error
-        if (!user) return res.status(400).json("Username is not found.");
+        if (!user) {
+            return res.status(401).json({
+                message: "You have entered invalid credentials"
+            });
+        }
 
-        // use the authService that uses bcrypt compare
+        // Check if hash matches with bcrypt
         const isMatch = await authService.verifyPassword(password, user.password);
-        if (!isMatch) return res.status(400).json("You have entered the wrong password.");
+        if (!isMatch) {
+            return res.status(401).json({
+                message: "You have entered invalid credentials"
+            });
+        }
 
 
-        // If it matches, jwt sign the user
-        // Destruct the safe info
-        const { password: _pw, ...safeUser } = user;
-        // TODO: Create a TODO that grabs the safe details from user prisma
-        const token = jwt.sign(safeUser, SECRET, { expiresIn: '1h' });
+        // Grab the safe user data
+        const { password: _password, ...safeUser } = user;
+        jwt.sign(safeUser, SECRET, (error, token) => {
+            if (error) {
+                return next(err);
+            }
 
-        return res.status(200).json({
-            message: "Login Sucessful",
-            token
+            return res.status(200).json({
+                token
+            });
         })
+
     } catch (err) {
         next(err);
     }
