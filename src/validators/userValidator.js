@@ -28,6 +28,19 @@ export const userRegisterValidation = [
 
 ]
 
+export const userLoginValidation = [
+    // email isemail and password not empty
+    body("email")
+    .trim()
+    .normalizeEmail()
+    .isEmail()
+    .bail()
+    .withMessage("You have entered an invalid email address."),
+    body("password")
+    .notEmpty()
+    .withMessage("You must type in your password.")
+]
+
 // This probably becomes like a validator middleware or an index validator file
 export const validate = (req, res, next) => {
     const errors = validationResult(req);

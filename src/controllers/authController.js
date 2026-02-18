@@ -2,7 +2,7 @@ import { SECRET } from "../config.js";
 import { prisma } from "../lib/prisma.js";
 import authService from '../services/authService.js'
 import jwt from "jsonwebtoken";
-import { userRegisterValidation, validate } from "../validators/userValidator.js";
+import { userLoginValidation, userRegisterValidation, validate } from "../validators/userValidator.js";
 // Create the action for register route
 export const register = [
     userRegisterValidation,
@@ -40,51 +40,55 @@ export const register = [
     }
 ]
 
-export const login = async (req, res, next) => {
+export const login = [
+    userLoginValidation,
+    validate,
+    async (req, res, next) => {
 
-    // Check if email and password exist
-    const { email, password } = req.body;
-    // Check if email matches in db
-    if (typeof email !== 'string' || typeof password !== 'string') {
-        return res.status(400).json({
-            message: "Entered invalid details."
-        })
-    }
-
-    try {
-        // Grab the email using prisma
-        const user = await prisma.user.findUnique({
-            where: { email }
-        });
-
-        if (!user) {
-            return res.status(401).json({
-                message: "You have entered invalid credentials"
-            });
+        // Check if email and password exist
+        const { email, password } = req.body;
+        // Check if email matches in db
+        if (typeof email !== 'string' || typeof password !== 'string') {
+            return res.status(400).json({
+                message: "Entered invalid details."
+            })
         }
 
-        // Check if hash matches with bcrypt
-        const isMatch = await authService.verifyPassword(password, user.password);
-        if (!isMatch) {
-            return res.status(401).json({
-                message: "You have entered invalid credentials"
+        try {
+            // Grab the email using prisma
+            const user = await prisma.user.findUnique({
+                where: { email }
             });
-        }
 
-
-        // Grab the safe user data
-        const { password: _password, ...safeUser } = user;
-        jwt.sign(safeUser, SECRET, (error, token) => {
-            if (error) {
-                return next(err);
+            if (!user) {
+                return res.status(401).json({
+                    message: "You have entered invalid credentials"
+                });
             }
 
-            return res.status(200).json({
-                token
-            });
-        })
+            // Check if hash matches with bcrypt
+            const isMatch = await authService.verifyPassword(password, user.password);
+            if (!isMatch) {
+                return res.status(401).json({
+                    message: "You have entered invalid credentials"
+                });
+            }
 
-    } catch (err) {
-        next(err);
+
+            // Grab the safe user data
+            const { password: _password, ...safeUser } = user;
+            jwt.sign(safeUser, SECRET, (err, token) => {
+                if (err) {
+                    return next(err);
+                }
+
+                return res.status(200).json({
+                    token
+                });
+            })
+
+        } catch (err) {
+            next(err);
+        }
     }
-}
+]
