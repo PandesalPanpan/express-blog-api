@@ -10,7 +10,15 @@ export const userRegisterValidation = [
     .trim()
     .isLength({ min: 5, max: 16 }).withMessage("Username must be atleast 5 upto 16 characters."),
     body("password")
-    .isLength({ min: 8, max: 32 }).withMessage("Password must be atleast 8 upto 32 characters.")
+    .isStrongPassword({
+        minLength: 8,
+        minUppercase: 1,
+        minLowercase: 1,
+        minNumbers: 1,
+        minSymbols: 0,
+    })
+    .withMessage("Password must atleast be 8 characters and include uppercase, lowercase and number.")    
+
 ]
 
 // This probably becomes like a validator middleware or an index validator file
