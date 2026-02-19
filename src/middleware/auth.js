@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { SECRET } from '../config';
+import { SECRET } from '../config.js';
 
 const auth = (req, res, next) => {
     // Grab the authorization header
