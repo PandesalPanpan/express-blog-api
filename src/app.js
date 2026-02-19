@@ -9,7 +9,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
 
 app.use("/api/auth", routes.auth);
-
+app.use("/api/post", routes.post);
 
 // Error Middleware
 app.use(errorHandler);
