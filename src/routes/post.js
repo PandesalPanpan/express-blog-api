@@ -5,8 +5,8 @@ import * as postController from '../controllers/postController.js'
 const router = Router();
 
 // Public Routes
-router.use("/", postController.index);
-
+router.get("/:postId", postController.show)
+router.get("/", postController.index);
 
 // Protected Routes
 router.use(auth)
